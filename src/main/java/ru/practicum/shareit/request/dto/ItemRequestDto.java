@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class ItemRequestDto {
-    LocalDateTime created;
+    private LocalDateTime created;
     @Positive(message = "Значение должно быть положительным числом")
     private Long id;
     @NotNull(message = "Значение не должно быть пустым")

@@ -38,21 +38,26 @@ public class UserServiceImpl implements UserService {
         User user = userStorage.getUserById(id).orElseThrow(() ->
                 new NotFoundException("Ошибка обновления пользователя. Пользователь не найден id:" + id));
 
-        if (userDto.getName() != null && !userDto.getName().isBlank()) {
-            user.setName(userDto.getName());
-        }
+        updateUserFields(user, userDto);
 
-        if (userDto.getEmail() != null && !userDto.getEmail().isBlank()) {
-            if (!userStorage.isUniqueEmail(userDto.getEmail())) {
-                throw new AlreadyExistsException("Ошибка обновления пользователя. Указанный email уже используется: " + userDto.getEmail());
-            }
-            user.setEmail(userDto.getEmail());
-        }
         return mapper.mapToUserDto(userStorage.update(user));
     }
 
     @Override
     public boolean delete(long id) {
         return userStorage.delete(id);
+    }
+
+    private void updateUserFields(User currentUser, UpdateUserDto newUser) {
+        if (newUser.getName() != null && !newUser.getName().isBlank()) {
+            currentUser.setName(newUser.getName());
+        }
+
+        if (newUser.getEmail() != null && !newUser.getEmail().isBlank()) {
+            if (!userStorage.isUniqueEmail(newUser.getEmail())) {
+                throw new AlreadyExistsException("Ошибка обновления пользователя. Указанный email уже используется: " + newUser.getEmail());
+            }
+            currentUser.setEmail(newUser.getEmail());
+        }
     }
 }

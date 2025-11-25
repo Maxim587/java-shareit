@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"id"})
 public class ItemRequest {
-    LocalDateTime created;
+    private LocalDateTime created;
     private Long id;
     private String description;
     private Long requestor;

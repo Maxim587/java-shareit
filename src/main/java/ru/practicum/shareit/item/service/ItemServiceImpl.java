@@ -55,23 +55,27 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemStorage.getItemById(itemId).orElseThrow(() ->
                 new NotFoundException("Ошибка обновления предмета. Предмет не найден id:" + itemId));
 
-        if (!item.getOwner().equals(owner)) {
-            throw new ForbiddenOperationException("Ошибка обновления предмета id:" + itemId +
+        updateItemFields(item, itemDto, owner);
+
+        return mapper.mapToItemDto(itemStorage.update(item));
+    }
+
+    private void updateItemFields(Item currentItem, UpdateItemDto newItem, Long owner) {
+        if (!currentItem.getOwner().equals(owner)) {
+            throw new ForbiddenOperationException("Ошибка обновления предмета id:" + currentItem.getId() +
                                                   ". Пользователь с id:" + owner + " не является владельцем предмета");
         }
 
-        if (itemDto.getName() != null && !itemDto.getName().isBlank()) {
-            item.setName(itemDto.getName());
+        if (newItem.getName() != null && !newItem.getName().isBlank()) {
+            currentItem.setName(newItem.getName());
         }
 
-        if (itemDto.getDescription() != null && !itemDto.getDescription().isBlank()) {
-            item.setDescription(itemDto.getDescription());
+        if (newItem.getDescription() != null && !newItem.getDescription().isBlank()) {
+            currentItem.setDescription(newItem.getDescription());
         }
 
-        if (itemDto.getAvailable() != null) {
-            item.setAvailable(itemDto.getAvailable());
+        if (newItem.getAvailable() != null) {
+            currentItem.setAvailable(newItem.getAvailable());
         }
-
-        return mapper.mapToItemDto(itemStorage.update(item));
     }
 }
