@@ -1,30 +1,17 @@
 package ru.practicum.shareit.booking.dto;
 
-
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.Data;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.user.dto.UserDto;
 
 import java.time.LocalDateTime;
 
 @Data
 public class BookingDto {
-    @Positive(message = "Значение должно быть положительным числом")
     private Long id;
-
-    @NotNull(message = "Значение не должно быть пустым")
     private LocalDateTime start;
-
-    @NotNull(message = "Значение не должно быть пустым")
     private LocalDateTime end;
-
-    @NotNull(message = "Значение не должно быть пустым")
-    @Positive(message = "Значение должно быть положительным числом")
-    private Long item;
-
-    @NotNull(message = "Значение не должно быть пустым")
-    @Positive(message = "Значение должно быть положительным числом")
-    private Long booker;
-
+    private ItemDto item;
+    private UserDto booker;
     private String status;
 }

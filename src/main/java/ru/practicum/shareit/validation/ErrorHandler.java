@@ -49,14 +49,14 @@ public class ErrorHandler {
     @ExceptionHandler(AlreadyExistsException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleAlreadyExists(final Throwable e) {
-        log.error(e.getMessage());
+        log.debug(e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler(ForbiddenOperationException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleForbiddenOperation(final Throwable e) {
-        log.error(e.getMessage());
+        log.debug(e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
 

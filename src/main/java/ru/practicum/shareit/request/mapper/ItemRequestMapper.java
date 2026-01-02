@@ -1,15 +1,19 @@
 package ru.practicum.shareit.request.mapper;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
-import ru.practicum.shareit.request.ItemRequest;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.user.model.User;
 
-@Mapper
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface ItemRequestMapper {
-    ItemRequestMapper INSTANCE = Mappers.getMapper(ItemRequestMapper.class);
-
+    @Mapping(target = "requestor", source = "requestor.id")
     ItemRequestDto mapToItemRequestDto(ItemRequest itemRequest);
 
-    ItemRequest mapToItemRequest(ItemRequestDto itemRequestDto);
+
+    @Mapping(target = "id", source = "itemRequestDto.id")
+    @Mapping(target = "requestor", source = "user")
+    ItemRequest mapToItemRequest(ItemRequestDto itemRequestDto, User user);
 }
