@@ -52,6 +52,11 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-launcher</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
@@ -81,6 +86,10 @@
 			<artifactId>querydsl-jpa</artifactId>
 			<classifier>jakarta</classifier>
 			<version>${querydsl.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
 		</dependency>
 	</dependencies>
 
