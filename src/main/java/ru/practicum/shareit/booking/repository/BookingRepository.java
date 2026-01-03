@@ -35,4 +35,5 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     boolean existsByItem_IdAndBooker_idAndStatusAndEndBefore(Long itemId, Long bookerId, BookingStatus bookingStatus, LocalDateTime end);
 
+    List<Booking> findByItem_IdAndStatusAndEndAfter(Long itemId, BookingStatus bookingStatus, LocalDateTime end);
 }

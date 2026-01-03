@@ -3,7 +3,7 @@ package ru.practicum.shareit.user.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.exception.AlreadyExistsException;
+import ru.practicum.shareit.exception.ConditionsNotMetException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UpdateUserDto;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -28,11 +28,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto create(UserDto userDto) {
-        if (userRepository.existsUserByEmail(userDto.getEmail())) {
-            throw new AlreadyExistsException("Ошибка создания пользователя. " +
-                                             "Указанный email уже используется: " + userDto.getEmail());
-        }
-
         return mapper.mapToUserDto(userRepository.save(mapper.mapToUser(userDto)));
     }
 
@@ -55,14 +50,16 @@ public class UserServiceImpl implements UserService {
     }
 
     private void updateUserFields(User currentUser, UpdateUserDto newUser) {
-        if (newUser.getName() != null && !newUser.getName().isBlank()) {
+        if (newUser.getName() != null) {
+            if (newUser.getName().isBlank()) {
+                throw new ConditionsNotMetException("Имя пользователя не может быть пустым");
+            }
             currentUser.setName(newUser.getName());
         }
 
-        if (newUser.getEmail() != null && !newUser.getEmail().isBlank()) {
-            if (userRepository.existsUserByEmail(newUser.getEmail())) {
-                throw new AlreadyExistsException("Ошибка обновления пользователя. " +
-                                                 "Указанный email уже используется: " + newUser.getEmail());
+        if (newUser.getEmail() != null) {
+            if (newUser.getEmail().isBlank()) {
+                throw new ConditionsNotMetException("Email пользователя не может быть пустым");
             }
             currentUser.setEmail(newUser.getEmail());
         }

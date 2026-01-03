@@ -38,8 +38,9 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new NotFoundException("Ошибка бронирования предмета. Пользователь с id " + bookerId + " не найден"));
         Item item = itemRepository.findById(bookingDto.getItemId()).orElseThrow(() ->
                 new NotFoundException("Ошибка бронирования предмета. Предмет с id " + bookingDto.getItemId() + " не найден"));
-        checkAvailable(item);
 
+        checkBookerIsNotOwner(bookerId, item);
+        checkAvailable(item, bookingDto);
         Booking booking = mapper.mapToBooking(bookingDto, booker, item);
         booking.setStatus(BookingStatus.WAITING);
         return mapper.mapToBookingDto(bookingRepository.save(booking));
@@ -67,9 +68,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> findUserBookings(Long bookerId, String state) {
-        BookingState bookingState = convertToBookingState(state);
-
-        Iterable<Booking> bookings = switch (bookingState) {
+        Iterable<Booking> bookings = switch (BookingState.of(state)) {
             case ALL -> bookingRepository.findByBooker_IdOrderByStartDesc(bookerId);
             case PAST -> bookingRepository.findByBooker_idAndEndBeforeOrderByStartDesc(bookerId, LocalDateTime.now());
             case WAITING -> bookingRepository.findByBooker_idAndStatusOrderByStartDesc(bookerId, BookingStatus.WAITING);
@@ -86,10 +85,9 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> findUserItemsBookings(Long ownerId, String state) {
-        BookingState bookingState = convertToBookingState(state);
         checkUserOwnsAnyItem(ownerId);
 
-        Iterable<Booking> bookings = switch (bookingState) {
+        Iterable<Booking> bookings = switch (BookingState.of(state)) {
             case ALL -> bookingRepository.findByItem_Owner_IdOrderByStartDesc(ownerId);
             case PAST ->
                     bookingRepository.findByItem_Owner_IdAndEndBeforeOrderByStartDesc(ownerId, LocalDateTime.now());
@@ -132,10 +130,18 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private void checkAvailable(Item item) {
-        if (!item.isAvailable()) {
+    private void checkAvailable(Item item, NewBookingDto bookingDto) {
+        if (!item.isAvailable() || checkIntersectionByDates(item.getId(), bookingDto)) {
             throw new ConditionsNotMetException("Предмет недоступен для бронирования");
         }
+    }
+
+    private boolean checkIntersectionByDates(Long itemId, NewBookingDto bookingDto) {
+        return bookingRepository.findByItem_IdAndStatusAndEndAfter(itemId, BookingStatus.APPROVED, LocalDateTime.now())
+                .stream().anyMatch(booking ->
+                        !(bookingDto.getEnd().isBefore(booking.getStart()) ||
+                          bookingDto.getStart().isAfter(booking.getEnd()))
+                );
     }
 
     private void checkDates(LocalDateTime startDate, LocalDateTime endDate) {
@@ -144,13 +150,9 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private BookingState convertToBookingState(String state) {
-        BookingState bookingState;
-        try {
-            bookingState = BookingState.valueOf(state.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new ConditionsNotMetException("Некорректное значение параметра state: " + state);
+    private void checkBookerIsNotOwner(Long bookerId, Item item) {
+        if (bookerId.equals(item.getOwner().getId())) {
+            throw new ForbiddenOperationException("Ошибка бронирования предмета. Пользователь id:" + bookerId + " является владельцем предмета");
         }
-        return bookingState;
     }
 }

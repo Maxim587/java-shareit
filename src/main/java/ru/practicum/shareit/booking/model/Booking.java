@@ -38,7 +38,6 @@ public class Booking {
     @JoinColumn(name = "booker_id")
     private User booker;
 
-    @Enumerated(EnumType.STRING)
     @JdbcType(PostgreSQLEnumJdbcType.class)
     private BookingStatus status;
 }

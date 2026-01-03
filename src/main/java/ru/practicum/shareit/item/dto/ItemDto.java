@@ -12,13 +12,12 @@ public class ItemDto {
     @Positive(message = "Значение должно быть положительным числом")
     private Long id;
 
-    @NotNull(message = "Значение не должно быть пустым")
     @NotBlank(message = "Значение не должно быть пустым")
     private String name;
 
-    @NotNull(message = "Значение не должно быть пустым")
+    @NotNull(message = "Поле является обязательным")
     private String description;
 
-    @NotNull(message = "Значение не должно быть пустым")
+    @NotNull(message = "Поле является обязательным")
     private Boolean available;
 }

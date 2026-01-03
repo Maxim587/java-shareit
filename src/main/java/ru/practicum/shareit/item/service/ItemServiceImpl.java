@@ -117,7 +117,11 @@ public class ItemServiceImpl implements ItemService {
                                                   ". Пользователь с id:" + owner + " не является владельцем предмета");
         }
 
-        if (newItem.getName() != null && !newItem.getName().isBlank()) {
+        if (newItem.getName() != null) {
+            if (newItem.getName().isBlank()) {
+                throw new ConditionsNotMetException("Ошибка обновления предмета id:" + currentItem.getId() +
+                                                    ". Название не может быть пустым");
+            }
             currentItem.setName(newItem.getName());
         }
 

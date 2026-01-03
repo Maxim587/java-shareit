@@ -1,6 +1,17 @@
+DROP TABLE IF EXISTS bookings;
+DROP TABLE IF EXISTS comments;
+DROP TABLE IF EXISTS items;
+DROP TABLE IF EXISTS requests;
+DROP TABLE IF EXISTS users;
 
-CREATE TYPE enum_booking_status AS ENUM ('WAITING', 'APPROVED', 'REJECTED', 'CANCELLED');
 
+DO '
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = ''enum_booking_status'') THEN
+            CREATE TYPE enum_booking_status AS ENUM (''WAITING'', ''APPROVED'', ''REJECTED'', ''CANCELLED'');
+        END IF;
+    END
+';
 
 CREATE TABLE IF NOT EXISTS users (
     id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
