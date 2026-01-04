@@ -30,12 +30,12 @@ public class UserController {
 
     @PatchMapping("/{userId}")
     UserDto update(@Valid @RequestBody UpdateUserDto userDto,
-                   @PathVariable long userId) {
+                   @PathVariable Long userId) {
         return userService.update(userDto, userId);
     }
 
     @DeleteMapping("/{userId}")
-    boolean delete(@PathVariable long userId) {
+    boolean delete(@PathVariable Long userId) {
         return userService.delete(userId);
     }
 }

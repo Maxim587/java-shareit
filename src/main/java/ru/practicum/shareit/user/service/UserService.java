@@ -6,11 +6,11 @@ import ru.practicum.shareit.user.dto.UserDto;
 import java.util.Optional;
 
 public interface UserService {
-    Optional<UserDto> getUserById(long id);
+    Optional<UserDto> getUserById(Long id);
 
     UserDto create(UserDto userDto);
 
-    UserDto update(UpdateUserDto userDto, long id);
+    UserDto update(UpdateUserDto userDto, Long id);
 
-    boolean delete(long id);
+    boolean delete(Long id);
 }

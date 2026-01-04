@@ -1,6 +1,7 @@
 package ru.practicum.shareit.validation;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestValueException;
@@ -49,15 +50,25 @@ public class ErrorHandler {
     @ExceptionHandler(AlreadyExistsException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleAlreadyExists(final Throwable e) {
-        log.error(e.getMessage());
+        log.debug(e.getMessage());
         return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler(ForbiddenOperationException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleForbiddenOperation(final Throwable e) {
-        log.error(e.getMessage());
+        log.debug(e.getMessage());
         return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleEmailConstraintViolation(final Throwable e) {
+        if (e.getMessage().contains("idx_users_email")) {
+            log.debug(e.getMessage());
+            return new ErrorResponse("Указанный email уже используется");
+        }
+        return new ErrorResponse("Произошла непредвиденная ошибка");
     }
 
     @ExceptionHandler(InternalServerException.class)
