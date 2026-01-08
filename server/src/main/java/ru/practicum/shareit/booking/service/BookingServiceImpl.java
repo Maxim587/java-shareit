@@ -65,7 +65,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto findBookingById(Long bookingId, Long userId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронирование с id " + bookingId + " не найдено"));
-        checkUserPermissions(booking, userId);
+        checkPermissions(booking, userId);
         return mapper.mapToBookingDto(booking);
     }
 
@@ -78,7 +78,7 @@ public class BookingServiceImpl implements BookingService {
             case WAITING -> bookingRepository.findByBooker_idAndStatus(bookerId, BookingStatus.WAITING, page);
             case FUTURE -> bookingRepository.findByBooker_IdAndStartAfter(bookerId, LocalDateTime.now(), page);
             case CURRENT ->
-                    bookingRepository.findByBooker_IdAndStartAfterAndEndBefore(bookerId, LocalDateTime.now(), LocalDateTime.now(), page);
+                    bookingRepository.findByBooker_IdAndStartBeforeAndEndAfter(bookerId, LocalDateTime.now(), LocalDateTime.now(), page);
             case REJECTED -> bookingRepository.findByBooker_idAndStatus(bookerId, BookingStatus.REJECTED, page);
         };
 
@@ -96,7 +96,7 @@ public class BookingServiceImpl implements BookingService {
             case WAITING -> bookingRepository.findByItem_Owner_IdAndStatus(ownerId, BookingStatus.WAITING, page);
             case FUTURE -> bookingRepository.findByItem_Owner_IdAndStartAfter(ownerId, LocalDateTime.now(), page);
             case CURRENT ->
-                    bookingRepository.findByItem_Owner_IdAndStartAfterAndEndBefore(ownerId, LocalDateTime.now(), LocalDateTime.now(), page);
+                    bookingRepository.findByItem_Owner_IdAndStartBeforeAndEndAfter(ownerId, LocalDateTime.now(), LocalDateTime.now(), page);
             case REJECTED -> bookingRepository.findByItem_Owner_IdAndStatus(ownerId, BookingStatus.REJECTED, page);
         };
 
@@ -110,9 +110,9 @@ public class BookingServiceImpl implements BookingService {
         return true;
     }
 
-    private void checkUserPermissions(Booking booking, Long userId) {
-        if (!(booking.getBooker().getId().equals(userId) ||
-              checkUserIsItemOwner(booking, userId))) {
+    private void checkPermissions(Booking booking, Long userId) {
+        boolean hasPermission = booking.getBooker().getId().equals(userId) || booking.getItem().getOwner().getId().equals(userId);
+        if (!hasPermission) {
             throw new ForbiddenOperationException("Пользователь с id " + userId + " не является автором бронирования");
         }
     }
