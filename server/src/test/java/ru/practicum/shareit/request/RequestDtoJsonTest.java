@@ -10,6 +10,7 @@ import ru.practicum.shareit.request.dto.ItemDataDto;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class RequestDtoJsonTest {
         assertThat(result).extractingJsonPathNumberValue("$.id").isEqualTo(1);
         assertThat(result).extractingJsonPathStringValue("$.description").isEqualTo("description");
         assertThat(result).extractingJsonPathNumberValue("$.requestorId").isEqualTo(2);
-        assertThat(result).extractingJsonPathStringValue("$.created").isEqualTo(requestDto.getCreated().toString());
+        assertThat(result).extractingJsonPathStringValue("$.created").isEqualTo(requestDto.getCreated().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         assertThat(result).extractingJsonPathNumberValue("$.items[0].itemId").isEqualTo(1);
         assertThat(result).extractingJsonPathNumberValue("$.items[0].ownerId").isEqualTo(6);
         assertThat(result).extractingJsonPathStringValue("$.items[0].name").isEqualTo("name");
