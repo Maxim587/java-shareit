@@ -85,10 +85,10 @@ public class ItemRequestControllerTest {
         item.setItemId(1L);
         item.setOwnerId(2L);
         item.setName("item_name");
-        List<ItemDataDto> ItemDtos = Arrays.asList(item);
+        List<ItemDataDto> itemDtos = Arrays.asList(item);
 
         ItemRequestDto itemRequestDto1 = makeItemRequestDto(1L, "desc1", 1L, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), Collections.emptyList());
-        ItemRequestDto itemRequestDto2 = makeItemRequestDto(2L, "desc2", 1L, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), ItemDtos);
+        ItemRequestDto itemRequestDto2 = makeItemRequestDto(2L, "desc2", 1L, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), itemDtos);
 
         List<ItemRequestDto> itemRequestDtos = Arrays.asList(itemRequestDto1, itemRequestDto2);
 
