@@ -103,11 +103,10 @@ public class BookingServiceImpl implements BookingService {
         return mapper.mapToBookingDtoList(bookings);
     }
 
-    private boolean checkUserIsItemOwner(Booking booking, Long userId) {
+    private void checkUserIsItemOwner(Booking booking, Long userId) {
         if (!booking.getItem().getOwner().getId().equals(userId)) {
             throw new ForbiddenOperationException("Пользователь с id " + userId + " не является владельцем предмета");
         }
-        return true;
     }
 
     private void checkPermissions(Booking booking, Long userId) {

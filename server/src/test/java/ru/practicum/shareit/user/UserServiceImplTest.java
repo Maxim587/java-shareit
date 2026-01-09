@@ -3,10 +3,12 @@ package ru.practicum.shareit.user;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.Util;
 import ru.practicum.shareit.exception.ConditionsNotMetException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UpdateUserDto;
@@ -29,14 +31,18 @@ class UserServiceImplTest {
 
     private final EntityManager em;
     private final UserService service;
-    @Autowired
-    private UserService userService;
+
+    UserDto userDto;
+    UserDto userDtoSaved;
+
+    @BeforeEach
+    void setUp() {
+        userDto = Util.makeUserDto("name", "mail@mail.com");
+        userDtoSaved = service.create(userDto);
+    }
 
     @Test
     void create() {
-        UserDto userDto = makeUserDto("name", "mail@mail.com");
-        service.create(userDto);
-
         TypedQuery<User> query = em.createQuery("Select u from User u where u.email = :email", User.class);
         User user = query.setParameter("email", userDto.getEmail()).getSingleResult();
 
@@ -47,8 +53,6 @@ class UserServiceImplTest {
 
     @Test
     void getUserById() {
-        UserDto userDto = makeUserDto("name", "mail@mail.com");
-        UserDto userDtoSaved = service.create(userDto);
         Optional<UserDto> userDtoById = service.getUserById(userDtoSaved.getId());
 
         assertThat(userDtoById.isPresent(), is(true));
@@ -59,14 +63,11 @@ class UserServiceImplTest {
 
     @Test
     void update() {
-        UserDto userDto = makeUserDto("name", "mail@mail.com");
-        UserDto userDtoSaved = service.create(userDto);
-
         UpdateUserDto updateUserDto = new UpdateUserDto();
         updateUserDto.setName("newName");
         updateUserDto.setEmail("newEmail@mail.com");
 
-        userService.update(updateUserDto, userDtoSaved.getId());
+        service.update(updateUserDto, userDtoSaved.getId());
         Optional<UserDto> userDtoById = service.getUserById(userDtoSaved.getId());
 
         assertThat(userDtoById.isPresent(), is(true));
@@ -74,27 +75,24 @@ class UserServiceImplTest {
         assertThat(userDtoById.get().getEmail(), equalTo(updateUserDto.getEmail()));
 
         //user not exists
-        assertThrows(NotFoundException.class, () -> userService.update(updateUserDto, 999L));
+        assertThrows(NotFoundException.class, () -> service.update(updateUserDto, 999L));
 
         //empty name
         updateUserDto.setName("");
-        assertThrows(ConditionsNotMetException.class, () -> userService.update(updateUserDto, userDtoSaved.getId()));
+        assertThrows(ConditionsNotMetException.class, () -> service.update(updateUserDto, userDtoSaved.getId()));
 
         //empty email
         updateUserDto.setEmail("");
-        assertThrows(ConditionsNotMetException.class, () -> userService.update(updateUserDto, userDtoSaved.getId()));
+        assertThrows(ConditionsNotMetException.class, () -> service.update(updateUserDto, userDtoSaved.getId()));
     }
 
     @Test
-    void updateWithNameAndEmailIsNull() {
-        UserDto userDto = makeUserDto("name", "mail@mail.com");
-        UserDto userDtoSaved = service.create(userDto);
-
+    void updateWithNameAndEmailAreNull() {
         UpdateUserDto updateUserDto = new UpdateUserDto();
         updateUserDto.setName(null);
         updateUserDto.setEmail(null);
 
-        userService.update(updateUserDto, userDtoSaved.getId());
+        service.update(updateUserDto, userDtoSaved.getId());
         Optional<UserDto> userDtoById = service.getUserById(userDtoSaved.getId());
 
         assertThat(userDtoById.isPresent(), is(true));
@@ -104,19 +102,9 @@ class UserServiceImplTest {
 
     @Test
     void delete() {
-        UserDto userDto = makeUserDto("name", "mail@mail.com");
-        UserDto userDtoSaved = service.create(userDto);
-
-        boolean isDeleted = userService.delete(userDtoSaved.getId());
+        boolean isDeleted = service.delete(userDtoSaved.getId());
         assertThat(isDeleted, is(true));
         Optional<UserDto> userDtoById = service.getUserById(userDtoSaved.getId());
         assertThat(userDtoById.isPresent(), is(false));
-    }
-
-    private UserDto makeUserDto(String name, String email) {
-        UserDto dto = new UserDto();
-        dto.setName(name);
-        dto.setEmail(email);
-        return dto;
     }
 }

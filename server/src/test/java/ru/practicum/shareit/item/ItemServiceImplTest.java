@@ -27,6 +27,8 @@ import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static ru.practicum.shareit.Util.makeItemDto;
+import static ru.practicum.shareit.Util.makeUserDto;
 
 @Transactional
 @SpringBootTest
@@ -207,22 +209,4 @@ public class ItemServiceImplTest {
         newCommentDto1.setText("some text");
         assertThrows(ConditionsNotMetException.class, () -> itemService.createComment(newCommentDto1, 999L, 999L));
     }
-
-    private UserDto makeUserDto(String name, String email) {
-        UserDto dto = new UserDto();
-        dto.setName(name);
-        dto.setEmail(email);
-        return dto;
-    }
-
-    private ItemDto makeItemDto(Long id, String name, String description, boolean available, Long requestId) {
-        ItemDto dto = new ItemDto();
-        dto.setId(id);
-        dto.setName(name);
-        dto.setDescription(description);
-        dto.setAvailable(available);
-        dto.setRequestId(requestId);
-        return dto;
-    }
-
 }

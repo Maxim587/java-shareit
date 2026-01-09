@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.Util;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
@@ -21,6 +22,8 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static ru.practicum.shareit.Util.makeNewItemRequestDto;
+import static ru.practicum.shareit.Util.makeUserDto;
 
 @Transactional
 @SpringBootTest
@@ -28,8 +31,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class ItemRequestServiceImplTest {
     private final ItemRequestService itemRequestService;
     private final UserService userService;
-    @Autowired
-    private ItemService itemService;
+    private final ItemService itemService;
+
 
     @Test
     void getItemRequests() {
@@ -80,11 +83,11 @@ public class ItemRequestServiceImplTest {
         UserDto ownerDto = makeUserDto("name", "email@email.com");
         UserDto owner = userService.create(ownerDto);
 
-        ItemDto itemDto1 = makeItemDto(null, "name1", "desc1", true, requestDtoSaved1.getId());
-        ItemDto item1 = itemService.create(itemDto1, owner.getId());
+        ItemDto itemDto1 = Util.makeItemDto(null, "name1", "desc1", true, requestDtoSaved1.getId());
+        itemService.create(itemDto1, owner.getId());
 
-        ItemDto itemDto2 = makeItemDto(null, "name2", "desc2", true, requestDtoSaved2.getId());
-        ItemDto item2 = itemService.create(itemDto2, owner.getId());
+        ItemDto itemDto2 = Util.makeItemDto(null, "name2", "desc2", true, requestDtoSaved2.getId());
+        itemService.create(itemDto2, owner.getId());
 
         List<ItemRequestDto> targetRequests = itemRequestService.getUserItemRequests(requestorId, 0, 10);
 
@@ -125,28 +128,5 @@ public class ItemRequestServiceImplTest {
     void create() {
         NewItemRequestDto newRequestDto = makeNewItemRequestDto("description1");
         assertThrows(NotFoundException.class, () -> itemRequestService.create(999L, newRequestDto));
-    }
-
-    private NewItemRequestDto makeNewItemRequestDto(String description) {
-        NewItemRequestDto newItemRequestDto = new NewItemRequestDto();
-        newItemRequestDto.setDescription(description);
-        return newItemRequestDto;
-    }
-
-    private UserDto makeUserDto(String name, String email) {
-        UserDto dto = new UserDto();
-        dto.setName(name);
-        dto.setEmail(email);
-        return dto;
-    }
-
-    private ItemDto makeItemDto(Long id, String name, String description, boolean available, Long requestId) {
-        ItemDto dto = new ItemDto();
-        dto.setId(id);
-        dto.setName(name);
-        dto.setDescription(description);
-        dto.setAvailable(available);
-        dto.setRequestId(requestId);
-        return dto;
     }
 }

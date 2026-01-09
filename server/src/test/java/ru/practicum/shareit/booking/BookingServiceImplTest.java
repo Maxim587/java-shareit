@@ -27,6 +27,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static ru.practicum.shareit.Util.*;
 
 @Transactional
 @SpringBootTest
@@ -237,32 +238,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void enumof() {
+    void bookingStateOf() {
         assertThrows(ConditionsNotMetException.class, () -> BookingState.of("qqq"));
-    }
-
-    private NewBookingDto makeNewBookingDto(Long itemId, LocalDateTime start, LocalDateTime end) {
-        NewBookingDto dto = new NewBookingDto();
-        dto.setItemId(itemId);
-        dto.setStart(start);
-        dto.setEnd(end);
-        return dto;
-    }
-
-    private UserDto makeUserDto(String name, String email) {
-        UserDto dto = new UserDto();
-        dto.setName(name);
-        dto.setEmail(email);
-        return dto;
-    }
-
-    private ItemDto makeItemDto(Long id, String name, String description, boolean available, Long requestId) {
-        ItemDto dto = new ItemDto();
-        dto.setId(id);
-        dto.setName(name);
-        dto.setDescription(description);
-        dto.setAvailable(available);
-        dto.setRequestId(requestId);
-        return dto;
     }
 }
