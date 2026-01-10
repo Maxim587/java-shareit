@@ -42,7 +42,7 @@ public class BookingControllerTest {
 
 
     @Test
-    void create() throws Exception {
+    void createShouldReturnBookingDto() throws Exception {
         NewBookingDto newBookingDto = makeNewBookingDto(1L,
                 LocalDateTime.now().plusDays(1L).truncatedTo(ChronoUnit.SECONDS),
                 LocalDateTime.now().plusDays(10L).truncatedTo(ChronoUnit.SECONDS)
@@ -68,7 +68,7 @@ public class BookingControllerTest {
     }
 
     @Test
-    void approveBookingRequest() throws Exception {
+    void approveBookingRequestShouldReturnBookingDto() throws Exception {
         BookingDto dto = makeBookingDto(1L, makeItemDto(), makeUserDto(), "APPROVED",
                 LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.SECONDS),
                 LocalDateTime.now().plusDays(11L).truncatedTo(ChronoUnit.SECONDS)
@@ -91,7 +91,7 @@ public class BookingControllerTest {
     }
 
     @Test
-    void findUserBookings() throws Exception {
+    void findUserBookingsShouldReturnBookingDtoList() throws Exception {
         LocalDateTime start = LocalDateTime.now().plusDays(2L).truncatedTo(ChronoUnit.SECONDS);
         BookingDto dto1 = makeBookingDto(1L, makeItemDto(), makeUserDto(), "APPROVED", start, start.plusDays(1L));
         BookingDto dto2 = makeBookingDto(2L, makeItemDto(), makeUserDto(), "APPROVED", start.plusDays(10L), start.plusDays(11L));
@@ -116,7 +116,7 @@ public class BookingControllerTest {
     }
 
     @Test
-    void findBookingById() throws Exception {
+    void findBookingByIdShouldReturnBookingDto() throws Exception {
         LocalDateTime start = LocalDateTime.now().plusDays(2L).truncatedTo(ChronoUnit.SECONDS);
         BookingDto dto = makeBookingDto(1L, makeItemDto(), makeUserDto(), "APPROVED", start, start.plusDays(1L));
 
@@ -136,7 +136,7 @@ public class BookingControllerTest {
     }
 
     @Test
-    void findUserItemsBookings() throws Exception {
+    void findUserItemsBookingsShouldReturnBookingDtoList() throws Exception {
         LocalDateTime start = LocalDateTime.now().plusDays(2L).truncatedTo(ChronoUnit.SECONDS);
         BookingDto dto1 = makeBookingDto(1L, makeItemDto(), makeUserDto(), "APPROVED", start, start.plusDays(1L));
         BookingDto dto2 = makeBookingDto(2L, makeItemDto(), makeUserDto(), "APPROVED", start.plusDays(10L), start.plusDays(11L));

@@ -19,16 +19,20 @@ import java.util.List;
 @Table(name = "requests")
 public class ItemRequest {
 
-    @Column(name = "created_at")
-    private final LocalDateTime created = LocalDateTime.now();
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(nullable = false, length = 1024)
     private String description;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "requestor_id")
     private User requestor;
+
+    @Column(name = "created_at")
+    private final LocalDateTime created = LocalDateTime.now();
+
     @OneToMany(mappedBy = "request")
     private List<Item> items;
 }

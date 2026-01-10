@@ -20,9 +20,9 @@ import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static ru.practicum.shareit.Util.NONEXISTENT_ID;
 
 @Transactional
 @SpringBootTest
@@ -42,27 +42,29 @@ class UserServiceImplTest {
     }
 
     @Test
-    void create() {
+    void createShouldCreateUser() {
         TypedQuery<User> query = em.createQuery("Select u from User u where u.email = :email", User.class);
         User user = query.setParameter("email", userDto.getEmail()).getSingleResult();
 
-        assertThat(user.getId(), notNullValue());
-        assertThat(user.getName(), equalTo(userDto.getName()));
-        assertThat(user.getEmail(), equalTo(userDto.getEmail()));
+        assertThat(user, allOf(
+                hasProperty("id", notNullValue()),
+                hasProperty("name", equalTo(userDto.getName())),
+                hasProperty("email", equalTo(userDto.getEmail()))
+        ));
     }
 
     @Test
-    void getUserById() {
+    void getUserByIdWhenCorrectIdShouldReturnUser() {
         Optional<UserDto> userDtoById = service.getUserById(userDtoSaved.getId());
 
         assertThat(userDtoById.isPresent(), is(true));
-        assertThat(userDtoById.get().getId(), notNullValue());
-        assertThat(userDtoById.get().getName(), equalTo(userDto.getName()));
-        assertThat(userDtoById.get().getEmail(), equalTo(userDto.getEmail()));
+        assertThat(userDtoById.get().getId(), is(userDtoSaved.getId()));
+        assertThat(userDtoById.get().getName(), is(userDto.getName()));
+        assertThat(userDtoById.get().getEmail(), is(userDto.getEmail()));
     }
 
     @Test
-    void update() {
+    void updateShouldUpdateUser() {
         UpdateUserDto updateUserDto = new UpdateUserDto();
         updateUserDto.setName("newName");
         updateUserDto.setEmail("newEmail@mail.com");
@@ -73,35 +75,57 @@ class UserServiceImplTest {
         assertThat(userDtoById.isPresent(), is(true));
         assertThat(userDtoById.get().getName(), equalTo(updateUserDto.getName()));
         assertThat(userDtoById.get().getEmail(), equalTo(updateUserDto.getEmail()));
+    }
 
-        //user not exists
-        assertThrows(NotFoundException.class, () -> service.update(updateUserDto, 999L));
+    @Test
+    void updateWhenUserNotExistsShouldThrowNotFoundException() {
+        UpdateUserDto updateUserDto = new UpdateUserDto();
+        updateUserDto.setName("newName");
+        updateUserDto.setEmail("newEmail@mail.com");
 
-        //empty name
+        assertThrows(NotFoundException.class, () -> service.update(updateUserDto, NONEXISTENT_ID));
+    }
+
+    @Test
+    void updateWhenEmptyNameThenThrowConditionsNotMetException() {
+        UpdateUserDto updateUserDto = new UpdateUserDto();
         updateUserDto.setName("");
-        assertThrows(ConditionsNotMetException.class, () -> service.update(updateUserDto, userDtoSaved.getId()));
 
-        //empty email
-        updateUserDto.setEmail("");
         assertThrows(ConditionsNotMetException.class, () -> service.update(updateUserDto, userDtoSaved.getId()));
     }
 
     @Test
-    void updateWithNameAndEmailAreNull() {
+    void updateWhenEmptyEmailThenThrowConditionsNotMetException() {
         UpdateUserDto updateUserDto = new UpdateUserDto();
-        updateUserDto.setName(null);
-        updateUserDto.setEmail(null);
+        updateUserDto.setEmail("");
 
+        assertThrows(ConditionsNotMetException.class, () -> service.update(updateUserDto, userDtoSaved.getId()));
+    }
+
+
+    @Test
+    void updateWhenNameIsNullThenUserNameShouldNotBeUpdated() {
+        UpdateUserDto updateUserDto = new UpdateUserDto();
         service.update(updateUserDto, userDtoSaved.getId());
         Optional<UserDto> userDtoById = service.getUserById(userDtoSaved.getId());
 
         assertThat(userDtoById.isPresent(), is(true));
         assertThat(userDtoById.get().getName(), equalTo(userDtoSaved.getName()));
+    }
+
+    @Test
+    void updateWhenEmailIsNullThenUserEmailShouldNotBeUpdated() {
+        UpdateUserDto updateUserDto = new UpdateUserDto();
+
+        service.update(updateUserDto, userDtoSaved.getId());
+        Optional<UserDto> userDtoById = service.getUserById(userDtoSaved.getId());
+
+        assertThat(userDtoById.isPresent(), is(true));
         assertThat(userDtoById.get().getEmail(), equalTo(userDtoSaved.getEmail()));
     }
 
     @Test
-    void delete() {
+    void deleteShouldDeleteUser() {
         boolean isDeleted = service.delete(userDtoSaved.getId());
         assertThat(isDeleted, is(true));
         Optional<UserDto> userDtoById = service.getUserById(userDtoSaved.getId());

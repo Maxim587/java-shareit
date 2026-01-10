@@ -41,7 +41,7 @@ public class ItemControllerTest {
     private MockMvc mvc;
 
     @Test
-    void create() throws Exception {
+    void createShouldReturnItemDto() throws Exception {
         ItemDto itemDto = makeItemDto(1L, "name", "desc", true, 1L);
 
         when(itemService.create(any(ItemDto.class), anyLong()))
@@ -62,7 +62,7 @@ public class ItemControllerTest {
     }
 
     @Test
-    void update() throws Exception {
+    void updateShouldReturnItemDto() throws Exception {
         ItemDto itemDto = makeItemDto(1L, "name", "desc", true, 1L);
         UpdateItemDto updateItemDto = makeUpdateItemDto("name", "desc", true);
 
@@ -84,7 +84,7 @@ public class ItemControllerTest {
     }
 
     @Test
-    void createComment() throws Exception {
+    void createCommentShouldReturnCommentDto() throws Exception {
         CommentDto commentDto = makeCommentDto(1L, "text", 1L, "author", LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
         NewCommentDto newCommentDto = new NewCommentDto();
         newCommentDto.setText("text");
@@ -108,7 +108,7 @@ public class ItemControllerTest {
 
 
     @Test
-    void getUserItems() throws Exception {
+    void getUserItemsShouldReturnItemExtendedDtoList() throws Exception {
         BookingDatesDto lastBooking1 = makeBookingDatesDto(1L, LocalDateTime.now().minusDays(100).truncatedTo(ChronoUnit.SECONDS), LocalDateTime.now().minusDays(99).truncatedTo(ChronoUnit.SECONDS));
         BookingDatesDto lastBooking2 = makeBookingDatesDto(1L, LocalDateTime.now().plusDays(100).truncatedTo(ChronoUnit.SECONDS), LocalDateTime.now().minusDays(101).truncatedTo(ChronoUnit.SECONDS));
         BookingDatesDto nextBooking1 = makeBookingDatesDto(2L, LocalDateTime.now().plusDays(50).truncatedTo(ChronoUnit.SECONDS), LocalDateTime.now().minusDays(51).truncatedTo(ChronoUnit.SECONDS));
@@ -140,7 +140,7 @@ public class ItemControllerTest {
     }
 
     @Test
-    void getItemById() throws Exception {
+    void getItemByIdShouldReturnItemExtendedDto() throws Exception {
         BookingDatesDto lastBooking1 = makeBookingDatesDto(1L, LocalDateTime.now().minusDays(100).truncatedTo(ChronoUnit.SECONDS), LocalDateTime.now().minusDays(99).truncatedTo(ChronoUnit.SECONDS));
         BookingDatesDto nextBooking1 = makeBookingDatesDto(2L, LocalDateTime.now().plusDays(100).truncatedTo(ChronoUnit.SECONDS), LocalDateTime.now().plusDays(101).truncatedTo(ChronoUnit.SECONDS));
         ItemExtendedDto dto1 = makeItemExtendedDto(1L, "name1", "desc1", true, lastBooking1, nextBooking1, 1L);
@@ -165,7 +165,7 @@ public class ItemControllerTest {
     }
 
     @Test
-    void search() throws Exception {
+    void searchShouldReturnItemDtoList() throws Exception {
         ItemDto dto1 = makeItemDto(1L, "name1", "desc1", true, 1L);
         ItemDto dto2 = makeItemDto(2L, "name2", "desc3", true, null);
         List<ItemDto> itemDtos = Arrays.asList(dto1, dto2);

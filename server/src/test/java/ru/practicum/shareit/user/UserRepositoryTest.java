@@ -21,7 +21,7 @@ public class UserRepositoryTest {
     private final UserRepository userRepository;
 
     @Test
-    void createUser() {
+    void createShouldSaveUserInDatabase() {
         final User user = new User();
         user.setName("name");
         user.setEmail("email");

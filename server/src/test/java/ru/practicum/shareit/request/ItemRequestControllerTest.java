@@ -42,7 +42,7 @@ public class ItemRequestControllerTest {
     private MockMvc mvc;
 
     @Test
-    void create() throws Exception {
+    void createShouldReturnItemRequestDto() throws Exception {
         NewItemRequestDto newDto = makeNewItemRequestDto();
         ItemRequestDto responseDto = makeItemRequestDto(1L, "desc", 1L, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), Collections.emptyList());
 
@@ -64,7 +64,7 @@ public class ItemRequestControllerTest {
     }
 
     @Test
-    void getItemRequestById() throws Exception {
+    void getItemRequestByIdShouldReturnItemRequestDto() throws Exception {
         ItemRequestDto responseDto = makeItemRequestDto(1L, "desc", 1L, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS), Collections.emptyList());
         when(itemRequestService.getItemRequestById(anyLong()))
                 .thenReturn(responseDto);
@@ -80,7 +80,7 @@ public class ItemRequestControllerTest {
     }
 
     @Test
-    void getUserItemRequests() throws Exception {
+    void getUserItemRequestsShouldReturnItemRequestDtoList() throws Exception {
         ItemDataDto item = new ItemDataDto();
         item.setItemId(1L);
         item.setOwnerId(2L);
@@ -111,7 +111,7 @@ public class ItemRequestControllerTest {
     }
 
     @Test
-    void getItemRequests() throws Exception {
+    void getItemRequestsShouldReturnItemRequestShortDtoList() throws Exception {
         ItemRequestShortDto itemRequestShortDto1 = makeItemRequestShortDto(1L, "desc1", 1L, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
         ItemRequestShortDto itemRequestShortDto2 = makeItemRequestShortDto(2L, "desc2", 1L, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
 

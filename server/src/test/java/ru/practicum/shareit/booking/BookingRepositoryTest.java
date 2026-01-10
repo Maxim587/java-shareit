@@ -29,7 +29,7 @@ public class BookingRepositoryTest {
 
 
     @Test
-    void create() {
+    void createShouldSaveBookingInDatabase() {
         User itemOwner = new User(null, "name", "mail@mail.ru");
         User booker = new User(null, "name2", "mail@mail.com");
         userRepository.save(itemOwner);

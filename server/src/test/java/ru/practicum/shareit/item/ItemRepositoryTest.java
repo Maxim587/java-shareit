@@ -24,7 +24,7 @@ public class ItemRepositoryTest {
     private final UserRepository userRepository;
 
     @Test
-    void search() {
+    void searchShouldFindItemsByCriteriaMatchedWithNameOrDescription() {
         User user = new User(null, "name", "mail@mail.ru");
         userRepository.save(user);
 

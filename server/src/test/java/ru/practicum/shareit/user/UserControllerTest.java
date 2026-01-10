@@ -41,7 +41,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void getUserById() throws Exception {
+    void getUserByIdShouldReturnUserDto() throws Exception {
         when(userService.getUserById(anyLong()))
                 .thenReturn(Optional.ofNullable(userDto));
 
@@ -53,7 +53,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void createUser() throws Exception {
+    void createUserShouldReturnUserDto() throws Exception {
         when(userService.create(any(UserDto.class)))
                 .thenReturn(userDto);
 
@@ -69,7 +69,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void updateUser() throws Exception {
+    void updateUserShouldReturnUserDto() throws Exception {
         UpdateUserDto updateUserDto = makeUpdateUserDto("newMail@new.ru", "newName");
         userDto.setEmail(updateUserDto.getEmail());
         userDto.setName(updateUserDto.getName());
@@ -88,7 +88,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void deleteUser() throws Exception {
+    void deleteUserShouldReturnTrueValueInBody() throws Exception {
         when(userService.delete(anyLong()))
                 .thenReturn(Boolean.TRUE);
 

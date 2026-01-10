@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.Util;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
@@ -17,13 +16,14 @@ import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
+import java.util.Arrays;
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static ru.practicum.shareit.Util.makeNewItemRequestDto;
-import static ru.practicum.shareit.Util.makeUserDto;
+import static ru.practicum.shareit.Util.*;
 
 @Transactional
 @SpringBootTest
@@ -35,98 +35,88 @@ public class ItemRequestServiceImplTest {
 
 
     @Test
-    void getItemRequests() {
-        UserDto userDto = makeUserDto("name", "mail@mail.com");
-        Long requestorId = userService.create(userDto).getId();
+    void getItemRequestsShouldReturnItemRequestsOfAllUsersExcludingCreatedByCurrentUser() {
+        Long requestorId = userService.create(makeRandomUserDto()).getId();
+        Long creatorId1 = userService.create(makeRandomUserDto()).getId();
+        Long creatorId2 = userService.create(makeRandomUserDto()).getId();
 
-        UserDto creatorDto1 = makeUserDto("name1", "mail1@mail.com");
-        UserDto creatorDto2 = makeUserDto("name2", "mail2@mail.com");
-        Long creatorId1 = userService.create(creatorDto1).getId();
-        Long creatorId2 = userService.create(creatorDto2).getId();
-
-        NewItemRequestDto newRequestDto1 = makeNewItemRequestDto("description1");
-        NewItemRequestDto newRequestDto2 = makeNewItemRequestDto("description2");
-        NewItemRequestDto newRequestDto3 = makeNewItemRequestDto("description3");
-
-        ItemRequestDto requestDtoSaved1 = itemRequestService.create(creatorId1, newRequestDto1);
-        ItemRequestDto requestDtoSaved2 = itemRequestService.create(creatorId2, newRequestDto2);
-        itemRequestService.create(requestorId, newRequestDto3);
+        ItemRequestDto requestDtoSaved1 = itemRequestService.create(creatorId1, makeNewItemRequestDto("description1"));
+        ItemRequestDto requestDtoSaved2 = itemRequestService.create(creatorId2, makeNewItemRequestDto("description2"));
+        List<ItemRequestDto> sourceRequests = Arrays.asList(requestDtoSaved1, requestDtoSaved2);
 
         List<ItemRequestShortDto> targetRequests = itemRequestService.getItemRequests(requestorId, 0, 10);
 
-        assertThat(targetRequests, hasSize(2));
-        assertThat(targetRequests, hasItem(allOf(
-                hasProperty("id", equalTo(requestDtoSaved1.getId())),
-                hasProperty("description", equalTo(requestDtoSaved1.getDescription())),
-                hasProperty("requestorId", equalTo(requestDtoSaved1.getRequestorId())),
-                hasProperty("created", equalTo(requestDtoSaved1.getCreated()))
-        )));
-        assertThat(targetRequests, hasItem(allOf(
-                hasProperty("id", equalTo(requestDtoSaved2.getId())),
-                hasProperty("description", equalTo(requestDtoSaved2.getDescription())),
-                hasProperty("requestorId", equalTo(requestDtoSaved2.getRequestorId())),
-                hasProperty("created", equalTo(requestDtoSaved2.getCreated()))
-        )));
+        assertThat(targetRequests, hasSize(sourceRequests.size()));
+        for (ItemRequestDto sourceRequest : sourceRequests) {
+            assertThat(targetRequests, hasItem(allOf(
+                    hasProperty("id", equalTo(sourceRequest.getId())),
+                    hasProperty("description", equalTo(sourceRequest.getDescription())),
+                    hasProperty("requestorId", equalTo(sourceRequest.getRequestorId())),
+                    hasProperty("created", equalTo(sourceRequest.getCreated()))
+            )));
+        }
     }
 
     @Test
-    void getUserItemRequests() {
-        UserDto userDto = makeUserDto("name", "mail@mail.com");
-        Long requestorId = userService.create(userDto).getId();
+    void getItemRequestsShouldNotReturnItemRequestsOfCurrentUser() {
+        Long requestorId = userService.create(makeRandomUserDto()).getId();
+        itemRequestService.create(requestorId, makeNewItemRequestDto("description1"));
+        List<ItemRequestShortDto> targetRequests = itemRequestService.getItemRequests(requestorId, 0, 10);
 
-        NewItemRequestDto newRequestDto1 = makeNewItemRequestDto("description1");
-        NewItemRequestDto newRequestDto2 = makeNewItemRequestDto("description2");
+        assertThat(targetRequests, hasSize(0));
+    }
 
-        ItemRequestDto requestDtoSaved1 = itemRequestService.create(requestorId, newRequestDto1);
-        ItemRequestDto requestDtoSaved2 = itemRequestService.create(requestorId, newRequestDto2);
+    @Test
+    void getUserItemRequestsShouldReturnAllItemRequestsOfCurrentUser() {
+        Long requestorId = userService.create(makeRandomUserDto()).getId();
+        ItemRequestDto requestDtoSaved1 = itemRequestService.create(requestorId, makeNewItemRequestDto("description1"));
+        ItemRequestDto requestDtoSaved2 = itemRequestService.create(requestorId, makeNewItemRequestDto("description2"));
+        List<ItemRequestDto> sourceRequests = Arrays.asList(requestDtoSaved1, requestDtoSaved2);
 
-        UserDto ownerDto = makeUserDto("name", "email@email.com");
-        UserDto owner = userService.create(ownerDto);
+        UserDto itemOwner = userService.create(makeRandomUserDto());
+        ItemDto itemDto1 = makeItemDto(null, "name1", "desc1", true, requestDtoSaved1.getId());
+        itemService.create(itemDto1, itemOwner.getId());
 
-        ItemDto itemDto1 = Util.makeItemDto(null, "name1", "desc1", true, requestDtoSaved1.getId());
-        itemService.create(itemDto1, owner.getId());
-
-        ItemDto itemDto2 = Util.makeItemDto(null, "name2", "desc2", true, requestDtoSaved2.getId());
-        itemService.create(itemDto2, owner.getId());
+        ItemDto itemDto2 = makeItemDto(null, "name2", "desc2", true, requestDtoSaved2.getId());
+        itemService.create(itemDto2, itemOwner.getId());
 
         List<ItemRequestDto> targetRequests = itemRequestService.getUserItemRequests(requestorId, 0, 10);
 
-        assertThat(targetRequests, hasSize(2));
-        assertThat(targetRequests, hasItem(allOf(
-                hasProperty("id", equalTo(requestDtoSaved1.getId())),
-                hasProperty("description", equalTo(requestDtoSaved1.getDescription())),
-                hasProperty("requestorId", equalTo(requestDtoSaved1.getRequestorId())),
-                hasProperty("created", equalTo(requestDtoSaved1.getCreated()))
-        )));
-        assertThat(targetRequests, hasItem(allOf(
-                hasProperty("id", equalTo(requestDtoSaved2.getId())),
-                hasProperty("description", equalTo(requestDtoSaved2.getDescription())),
-                hasProperty("requestorId", equalTo(requestDtoSaved2.getRequestorId())),
-                hasProperty("created", equalTo(requestDtoSaved2.getCreated()))
-        )));
+        assertThat(targetRequests, hasSize(sourceRequests.size()));
+        for (ItemRequestDto sourceRequest : sourceRequests) {
+            assertThat(targetRequests, hasItem(allOf(
+                    hasProperty("id", equalTo(sourceRequest.getId())),
+                    hasProperty("description", equalTo(sourceRequest.getDescription())),
+                    hasProperty("requestorId", equalTo(sourceRequest.getRequestorId())),
+                    hasProperty("created", equalTo(sourceRequest.getCreated()))
+            )));
+        }
     }
 
     @Test
-    void getItemRequestById() {
-        UserDto userDto = makeUserDto("name", "mail@mail.com");
-        UserDto user = userService.create(userDto);
-        NewItemRequestDto newRequestDto1 = makeNewItemRequestDto("description1");
-        ItemRequestDto requestDtoSaved1 = itemRequestService.create(user.getId(), newRequestDto1);
+    void getItemRequestByIdWhenCorrectRequestIdShouldReturnItemRequest() {
+        UserDto requestor = userService.create(makeRandomUserDto());
+        ItemRequestDto request = itemRequestService.create(requestor.getId(), makeNewItemRequestDto("description"));
+        UserDto itemOwner = userService.create(makeRandomUserDto());
+        ItemDto itemDto = makeItemDto(null, "name", "desc", false, request.getId());
+        itemService.create(itemDto, itemOwner.getId());
 
-        ItemRequestDto targetRequests = itemRequestService.getItemRequestById(requestDtoSaved1.getId());
+        ItemRequestDto targetRequests = itemRequestService.getItemRequestById(request.getId());
 
-        assertThat(targetRequests.getId(), equalTo(requestDtoSaved1.getId()));
-        assertThat(targetRequests.getDescription(), equalTo(requestDtoSaved1.getDescription()));
-        assertThat(targetRequests.getRequestorId(), equalTo(requestDtoSaved1.getRequestorId()));
-        assertThat(targetRequests.getCreated(), equalTo(requestDtoSaved1.getCreated()));
-
-        //wrong request id
-        assertThrows(NotFoundException.class, () -> itemRequestService.getItemRequestById(999L));
+        assertThat(targetRequests.getId(), equalTo(request.getId()));
+        assertThat(targetRequests.getDescription(), equalTo(request.getDescription()));
+        assertThat(targetRequests.getRequestorId(), equalTo(request.getRequestorId()));
+        assertThat(targetRequests.getCreated(), equalTo(request.getCreated()));
     }
 
     @Test
-    void create() {
+    void getItemRequestByIdWhenNonexistentRequestIdShouldThrowNotFoundException() {
+        assertThrows(NotFoundException.class, () -> itemRequestService.getItemRequestById(NONEXISTENT_ID));
+    }
+
+    @Test
+    void createItemRequestWhenUserNotFoundShouldThrowNotFoundException() {
         NewItemRequestDto newRequestDto = makeNewItemRequestDto("description1");
-        assertThrows(NotFoundException.class, () -> itemRequestService.create(999L, newRequestDto));
+        assertThrows(NotFoundException.class, () -> itemRequestService.create(NONEXISTENT_ID, newRequestDto));
     }
 }

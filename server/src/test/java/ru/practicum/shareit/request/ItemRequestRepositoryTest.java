@@ -21,7 +21,7 @@ public class ItemRequestRepositoryTest {
     private final UserRepository userRepository;
 
     @Test
-    void create() {
+    void createShouldSaveItemRequestInDatabase() {
         User user = new User(null, "name", "mail@mail.ru");
         userRepository.save(user);
 
